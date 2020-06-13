@@ -23,19 +23,21 @@ class Game:
         self.status = 'Game'
 
         self.font = pg.font.Font("./resources/fonts/font.ttf", 40)
+        self.fontGrande = pg.font.Font('./resources/fonts/font.ttf', 60)
+
         self.text_score = self.font.render("Score:", True, COLOR_SCORE)
         self.score = self.font.render("0", True, COLOR_SCORE)
         self.level1 = self.font.render("Mercury", True, COLOR_SCORE)
         self.level2 = self.font.render("Venus", True, COLOR_SCORE)
         self.level3 = self.font.render("Earth", True, COLOR_SCORE)
+
+        self.text_game_over = self.fontGrande.render("GAME OVER", True, COLOR_SCORE)
+        self.text_insert_coin = self.font.render('<SPACE> - Inicio partida', True, COLOR_SCORE2)
        
-
-
         pg.display.set_caption("SpaceX")
 
 
     def handlenEvent(self):
-
         for event in pg.event.get():
             if event.type == QUIT:
                 self.quit()
@@ -48,7 +50,7 @@ class Game:
                         self.ship.vy = 2
             else:
                 self.ship.vy = 0
-                    
+      
         if not self.score_time == WIN_GAME_SCORE:
             key_pressed = pg.key.get_pressed()
             if key_pressed[K_w]:
@@ -59,7 +61,6 @@ class Game:
                 self.ship.vy = 0
         else:
             self.ship.vy = 0
-           
 
         return False
 
@@ -71,17 +72,14 @@ class Game:
         timer = 10 
         second = self.clock.tick(30) / 1000 
         
-        self.spawn_time = 10
-        
+        self.spawn_time = 10  
         self.spawn = []
-
 
         while not game_over:
             game_over = self.handlenEvent()
             self.ship.move(1280, 720)
-            
-                    
-           
+            #self.ship.colision(self.spawn)
+
             if not self.score_time == WIN_GAME_SCORE:
                 if self.clock.tick():
                     self.score_time +=1
@@ -89,30 +87,31 @@ class Game:
                     
                 for i in range(5):
                     self.spawn_time -= second
-                    if self.spawn_time <= 0:
+                    if self.spawn_time < 0:
                         self.spawn_time = 10
                         self.spawn.append(Enemies())
 
             for i in range(0, len(self.spawn)):
                 self.spawn[i].move(1280, 720)
+                if self.ship.colision(self.spawn[i]):
+                    game_over = True
                 
-
-
             if self.score_time == WIN_GAME_SCORE:
                     timer -= second
                     if timer <= 0:
                         self.planet.move(1280, 720)
                         self.ship.landing()
                         
-                        
                         #self.ship.rotate()
                         self.final_score = self.score_time + 500
                         self.score = self.font.render(str(self.final_score), True, COLOR_SCORE2)
-                        
-            
-                        #game_over = True
 
- 
+
+                        self.spawn = []
+                        #game_over = True
+                        
+                                    
+
             self.screen.blit(self.bkg, (0, 0))
 
             self.screen.blit(self.ship.image, (self.ship.posx, self.ship.posy))
@@ -131,7 +130,6 @@ class Game:
 
     def start_game(self):
         start = False
-
         while not start:
             for event in pg.event.get():
                 if event.type == QUIT:
@@ -141,10 +139,13 @@ class Game:
                     if event.key == K_SPACE:
                         start = True
 
-            self.screen.fill((0,0,BLACK))
-            self.screen.blit(self.bkg, (0, 0))
-            
+            self.screen.fill((BLACK))
+            self.screen.blit(self.text_game_over, (100, 100))
+            self.screen.blit(self.text_insert_coin, (100, 200))
+
             pg.display.flip()  
+
+        self.status = 'Game'
     
     def main_loop(self):
         while True:
@@ -156,7 +157,6 @@ class Game:
     def quit(self):
         pg.quit()
         sys.exit()
-
 
 if __name__ == "__main__":
     pg.init()

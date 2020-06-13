@@ -62,8 +62,7 @@ class Ship(Mobile):
         if self.Cy > limSupY - self.h // 2:
             self.Cy = limSupY - self.h // 2
 
-        
-
+    
     def landing(self):
 
         if self.Cy < 350:
@@ -71,12 +70,16 @@ class Ship(Mobile):
         if self.Cy > 350:
             self.Cy -= 2
         
-       
         self.Cx += 1
         if self.Cx >= 900:
             self.Cx = 900
 
-
+    def colision(self, something):
+        
+        if self.Cx == something.Cx:
+            
+            print("choque")
+            game_over = True
 
     def rotate(self):
         pass
@@ -102,10 +105,10 @@ class Enemies(Mobile):
 
 class Planet(Mobile):
     def __init__(self, centerx=0, centery=0):
-        super().__init__(600, 587, centerx=centerx, centery=centery)
+        super().__init__(500, 500, centerx=centerx, centery=centery)
         self.reset()
         self.color = COLOR_ENEMIES
-        self.image = pg.Surface((600,587), pg.SRCALPHA, 32)
+        self.image = pg.Surface((500,500), pg.SRCALPHA, 32)
         #self.image_planet1 = pg.image.load("./resources/images/mercury.png")
         #self.image_planet2 = pg.image.load("./resources/images/venus.png")
         self.image_planet3 = pg.image.load("./resources/images/earth.png")
