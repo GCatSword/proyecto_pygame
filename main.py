@@ -8,7 +8,7 @@ BLACK = (0,0,0)
 COLOR_SCORE = (204, 153, 0)
 COLOR_SCORE2 = (204, 0, 0)
 
-WIN_GAME_SCORE = 100
+WIN_GAME_SCORE = 1000
 
 class Game:
     def __init__(self):
@@ -17,14 +17,8 @@ class Game:
         self.screen.fill(BLACK)
         self.bkg = pg.image.load("./resources/images/fondo2.jpg")
         self.ship = Ship(100)
-
-        self.e1 = Enemies()
-        self.e2 = Enemies()
-        self.e3 = Enemies()
-        self.e4 = Enemies()
-        self.e5 = Enemies()
-        self.e6 = Enemies()
-        self.e7 = Enemies()
+        self.planet = Planet()
+        self.clock = pg.time.Clock()
 
         self.status = 'Game'
 
@@ -37,66 +31,96 @@ class Game:
        
 
 
-        self.clock = pg.time.Clock()
-
-
-        
         pg.display.set_caption("SpaceX")
 
 
     def handlenEvent(self):
+
         for event in pg.event.get():
             if event.type == QUIT:
                 self.quit()
-                        
-            if event.type == KEYDOWN:
-                if event.key == K_w:
-                    self.ship.vy = -2
-                if event.key == K_s:
-                    self.ship.vy = 2
 
-        key_pressed = pg.key.get_pressed()
-        if key_pressed[K_w]:
-            self.ship.vy -= 0.1
-        elif key_pressed[K_s]:
-            self.ship.vy += 0.1
+            if not self.score_time == WIN_GAME_SCORE:
+                if event.type == KEYDOWN:
+                    if event.key == K_w:
+                        self.ship.vy = -2
+                    elif event.key == K_s:
+                        self.ship.vy = 2
+            else:
+                self.ship.vy = 0
+                    
+        if not self.score_time == WIN_GAME_SCORE:
+            key_pressed = pg.key.get_pressed()
+            if key_pressed[K_w]:
+                self.ship.vy -= 0.1
+            elif key_pressed[K_s]:
+                self.ship.vy += 0.1
+            else:
+                self.ship.vy = 0
         else:
             self.ship.vy = 0
-        
+           
+
         return False
+
 
     def loop_game(self):
         game_over = False
         self.score_time = 0
         self.final_score = 0
         timer = 10 
-        second = self.clock.tick(30) / 1000  
+        second = self.clock.tick(30) / 1000 
+        
+        self.spawn_time = 10
+        
+        self.spawn = []
+
 
         while not game_over:
             game_over = self.handlenEvent()
             self.ship.move(1280, 720)
-            self.e1.move(1280, 720)
-
-
+            
+                    
+           
             if not self.score_time == WIN_GAME_SCORE:
                 if self.clock.tick():
                     self.score_time +=1
                     self.score = self.font.render(str(self.score_time), True, COLOR_SCORE)
                     
-    
+                for i in range(5):
+                    self.spawn_time -= second
+                    if self.spawn_time <= 0:
+                        self.spawn_time = 10
+                        self.spawn.append(Enemies())
+
+            for i in range(0, len(self.spawn)):
+                self.spawn[i].move(1280, 720)
+                
+
+
             if self.score_time == WIN_GAME_SCORE:
                     timer -= second
                     if timer <= 0:
+                        self.planet.move(1280, 720)
+                        self.ship.landing()
+                        
+                        
+                        #self.ship.rotate()
                         self.final_score = self.score_time + 500
                         self.score = self.font.render(str(self.final_score), True, COLOR_SCORE2)
-                        #self.screen.blit(self.planet.image, (self.planet.posx, self.planet.posy))
+                        
             
                         #game_over = True
 
  
             self.screen.blit(self.bkg, (0, 0))
+
             self.screen.blit(self.ship.image, (self.ship.posx, self.ship.posy))
-            self.screen.blit(self.e1.image, (self.e1.posx, self.e1.posy))
+
+            
+            for i in range(0, len(self.spawn)):
+                self.screen.blit(self.spawn[i].image, (self.spawn[i].posx, self.spawn[i].posy))
+            self.screen.blit(self.planet.image, (self.planet.posx, self.planet.posy))
             self.screen.blit(self.text_score, (10, 20))
             self.screen.blit(self.score, (150, 20))
             self.screen.blit(self.level1, (550, 20))

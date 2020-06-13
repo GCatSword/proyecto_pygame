@@ -5,6 +5,7 @@ import sys, random
 COLOR_SHIP = (175,0,0)
 COLOR_ENEMIES = (0, 153, 51)
 BLACK = (0,0,0)
+FPS = 60
 
 class Mobile:
     vx = 0
@@ -42,8 +43,13 @@ class Mobile:
 
 class Ship(Mobile):
     def __init__(self, centerx):
-        super().__init__(50,25,centerx,350)
+        super().__init__(50,51,centerx,350)
         self.color = COLOR_SHIP
+
+        self.image = pg.Surface((50,51), pg.SRCALPHA, 32)
+        self.image_ship = pg.image.load("./resources/images/nave2.png")
+        self.image.blit(self.image_ship, (0,0))
+                
         
     def move(self, limSupX, limSupY):
 
@@ -55,6 +61,26 @@ class Ship(Mobile):
 
         if self.Cy > limSupY - self.h // 2:
             self.Cy = limSupY - self.h // 2
+
+        
+
+    def landing(self):
+
+        if self.Cy < 350:
+            self.Cy += 2
+        if self.Cy > 350:
+            self.Cy -= 2
+        
+       
+        self.Cx += 1
+        if self.Cx >= 900:
+            self.Cx = 900
+
+
+
+    def rotate(self):
+        pass
+        
 
 
 class Enemies(Mobile):
@@ -70,5 +96,35 @@ class Enemies(Mobile):
     def reset(self):
         self.vx = random.choice([-1,-2])
         self.vy = 0
-        self.Cx = random.randint(900, 1100)
+        self.Cx = random.randint(1200, 1280)
         self.Cy = random.randint(60, 600)
+
+
+class Planet(Mobile):
+    def __init__(self, centerx=0, centery=0):
+        super().__init__(600, 587, centerx=centerx, centery=centery)
+        self.reset()
+        self.color = COLOR_ENEMIES
+        self.image = pg.Surface((600,587), pg.SRCALPHA, 32)
+        #self.image_planet1 = pg.image.load("./resources/images/mercury.png")
+        #self.image_planet2 = pg.image.load("./resources/images/venus.png")
+        self.image_planet3 = pg.image.load("./resources/images/earth.png")
+        #self.image.blit(self.image_planet1, (0,0))
+        #self.image.blit(self.image_planet2, (0,0))
+        self.image.blit(self.image_planet3, (0,0))
+
+
+       
+    def move(self, limSupX, limSupY):
+        
+        self.Cx += self.vx
+        self.Cy += self.vy
+
+        if self.Cx <= 1200:
+            self.Cx = 1200
+
+    def reset(self):
+        self.vx = -0.5
+        self.vy = 0
+        self.Cx = 1600
+        self.Cy = 350
