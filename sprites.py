@@ -50,29 +50,11 @@ class Enemy(pg.sprite.Sprite):
         self.rect.centerx = random.randint(1200, 1280)
         self.rect.centery = random.randint(50, 700)
 
-    def comprobarChoque(self, group):
-        pass
-    '''
-        lista_candidatos = pg.sprite.spritecollide(self, group, False)
-        if len(lista_candidatos) > 0:
-            self.vx *= -random.uniform(0.9, 1.1)
-            self.vy *= random.uniform(0.9, 1.1)
+    def colision(self, group):
+        colision = pg.sprite.spritecollide(self, group, True)
 
-            self.rect.centerx += self.vx
-            self.rect.centery += self.vy
-            self.ping.play()
-            '''
-    '''
-    def comprobarChoque(self, something):
-        dx = abs(self.rect.centerx - something.rect.centerx)
-        dy = abs(self.rect.centery - something.rect.centery)
-        if dx < (self.rect.w + something.rect.w)//2 and dy < (self.rect.h +something.rect.h) // 2:
-            self.vx *= -random.uniform(0.8, 1.3)
-            self.vy *= random.uniform(0.8, 1.3)
-            self.rect.centerx += self.vx
-            self.rect.centery += self.vy
-            self.ping.play()
-    '''
+
+
     def update(self, limSupX, limSupY):
                         
         self.rect.centerx += self.vx
