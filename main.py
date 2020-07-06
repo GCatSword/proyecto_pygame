@@ -70,7 +70,7 @@ class Game:
         self.level3_sound = pg.mixer.Sound('./resources/sounds/pax8.wav')
         self.gameover_sound = pg.mixer.Sound('./resources/sounds/pax7.wav')
         self.score_sound = pg.mixer.Sound('./resources/sounds/pax10.wav')
-        
+
         # Status inicial
         self.status = 'Start'
 
@@ -359,7 +359,7 @@ class Game:
                     self.spawn_time = self.reset_tiempo 
                     self.enemySprites.add(Enemy())
                     self.allSprites.add(self.enemySprites)
-                    print(self.spawn_enemy)
+                    
                 colisiones = self.ship.checkCollision(self.enemySprites, FPS)
                 # Condiciones cuando hay colision
                 for colision in colisiones:
