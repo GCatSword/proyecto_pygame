@@ -35,8 +35,7 @@ class Game:
         self.win_game_score = 0 # Puntuación base
         self.win_score_level = 1000 # Puntuación por nivel
         self.angle = 0
-        self.n = 0
-
+        
         # Imagen fondo
         self.bkg3 = pg.image.load("./resources/images/fondo3.jpg")
         self.bkg1 = pg.image.load("./resources/images/fondo444.jpg")
