@@ -6,6 +6,7 @@ Proyecto final del Bootcamp 0 (Python) de Keepcoding
 ## Instalación 🔧
 
 Instalar pygame en un entorno virtual o en tu máquina con:
+
 _Versión de pygame==1.9.6_
 
 ```
