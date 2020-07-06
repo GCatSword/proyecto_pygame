@@ -33,7 +33,7 @@ class Game:
         self.final_score3 = 0
         self.bonus_score = 10
         self.win_game_score = 0 # Puntuación base
-        self.win_score_level = 10 # Puntuación por nivel
+        self.win_score_level = 1000 # Puntuación por nivel
         self.angle = 0
         self.n = 0
 
@@ -245,7 +245,6 @@ class Game:
         if self.score_time == self.win_game_score:
             self.screen.blit(self.next, (400, 650))
             if self.contador_nivel == 3 and self.difficulty == 'Xtrem':
-                self.playerGroup2.draw(self.screen)
                 self.score_bonus = self.font.render(str(self.bonus_score), True, COLOR_SCORE)
                 self.screen.blit(self.score_bonus, (150, 60))
         if self.contador_colision > 0 and self.contador_vidas >= 1:   
@@ -256,13 +255,13 @@ class Game:
     def config_levels(self):
         if FPS == 30:
             self.reset_tiempo = 5
-            self.win_score_level = 500
+            self.win_score_level = 1000
         elif FPS == 60:
             self.reset_tiempo = 10
-           # self.win_score_level = 1000
+            self.win_score_level = 2000
         elif FPS == 120:
             self.reset_tiempo = 20
-            self.win_score_level = 2000
+            self.win_score_level = 4000
 
         # Configuración de los niveles
         if self.difficulty == 'Easy':
@@ -283,7 +282,7 @@ class Game:
         if self.contador_nivel == 1:
             self.planet1 = Planet(1)
             self.planetsGroup.add(self.planet1)
-            self.spawn_enemy = 200
+            self.spawn_enemy = 400
             self.spawn_time = 0
             self.final_score1 = 0
             self.level1_sound.play(-1)
@@ -292,7 +291,7 @@ class Game:
         if self.contador_nivel == 2:
             self.planet2 = Planet(2)
             self.planetsGroup.add(self.planet2)
-            self.spawn_enemy = 300
+            self.spawn_enemy = 600
             self.spawn_time = 0
             self.final_score2 = 0
             self.level2_sound.play(-1)
@@ -301,7 +300,7 @@ class Game:
         if self.contador_nivel == 3:
             self.planet3 = Planet(3)
             self.planetsGroup.add(self.planet3)
-            self.spawn_enemy = 700
+            self.spawn_enemy = 1200
             self.spawn_time = 0
             self.final_score3 = 0
             self.level3_sound.play(-1)
@@ -353,12 +352,13 @@ class Game:
             if not self.score_time == self.win_game_score:
                 # Spawn enemigos/obstaculos
                 self.spawn_time -= self.restar_tiempo
+                
                 if self.spawn_time <= 0 and self.spawn_enemy > 0:
                     self.spawn_enemy -= 1
                     self.spawn_time = self.reset_tiempo 
                     self.enemySprites.add(Enemy())
                     self.allSprites.add(self.enemySprites)
-                
+                    print(self.spawn_enemy)
                 colisiones = self.ship.checkCollision(self.enemySprites, FPS)
                 # Condiciones cuando hay colision
                 for colision in colisiones:
@@ -403,7 +403,7 @@ class Game:
 
                 # Juego bonus
                 if self.contador_nivel == 3 and self.difficulty == 'Xtrem':
-                    self.playerGroup2.update(1280, 720)
+                    self.allSprites.add(self.playerGroup2)
                     self.astronaut.rotate(self.angle)
                     self.spawn_time -= self.restar_tiempo
                     
@@ -554,8 +554,7 @@ class Game:
             self.status = 'Hall of fame'
 
     def text_input(self, word, x, y, color):
-        font = pg.font.Font("./resources/fonts/font.ttf", 40)
-        text = font.render("{}".format(word), True, color)
+        text = self.font.render("{}".format(word), True, color)
         return self.screen.blit(text,(x,y))
 
     def inpt(self):
