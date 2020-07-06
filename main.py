@@ -14,7 +14,7 @@ COLOR_H = (228, 138, 33)
 COLOR_X = (228, 33, 33)
 
 VOLUMEN = 0.5
-FPS = 30
+FPS = 60
 
 class Game:
     def __init__(self):
@@ -31,9 +31,11 @@ class Game:
         self.final_score1 = 0
         self.final_score2 = 0
         self.final_score3 = 0
+        self.bonus_score = 10
         self.win_game_score = 0 # Puntuación base
-        self.win_score_level = 500 # Puntuación por nivel
+        self.win_score_level = 10 # Puntuación por nivel
         self.angle = 0
+        self.n = 0
 
         # Imagen fondo
         self.bkg3 = pg.image.load("./resources/images/fondo3.jpg")
@@ -61,9 +63,12 @@ class Game:
         self.image_difficulty = pg.image.load("./resources/images/fondo_difficulty.jpg")
 
         # Música y sonidos
+        self.intro_sound = pg.mixer.Sound('./resources/sounds/casa-asteroide.wav')
+        self.difficulty_sound = pg.mixer.Sound('./resources/sounds/pax4.wav')
         self.level1_sound = pg.mixer.Sound('./resources/sounds/pax3.wav')
         self.level2_sound = pg.mixer.Sound('./resources/sounds/pax5.wav')
         self.level3_sound = pg.mixer.Sound('./resources/sounds/pax8.wav')
+        self.gameover_sound = pg.mixer.Sound('./resources/sounds/pax7.wav')
 
         # Status inicial
         self.status = 'Start'
@@ -87,6 +92,7 @@ class Game:
         self.text_score = self.font.render("Score:", True, COLOR_SCORE)
         self.text_winner = self.font_big.render("WINNER", True, COLOR_SCORE2)
         self.score = self.font.render("0", True, COLOR_SCORE)
+        self.score_bonus = self.font.render(" ", True, COLOR_SCORE)
         self.text_restart = self.font.render("<R> - Restart level", True, COLOR_SCORE)
         self.level1 = self.font.render("Braxis", True, COLOR_SCORE)
         self.level2 = self.font.render("Aiur", True, COLOR_SCORE)
@@ -138,7 +144,6 @@ class Game:
 
 
     def handlenEvent(self):
-
         for event in pg.event.get():
             if event.type == QUIT:
                 self.quit()
@@ -149,22 +154,22 @@ class Game:
                 else:
                     if event.type == KEYDOWN:
                         if event.key == K_w:
-                            self.ship.vy = -7
+                            self.ship.vy = -1
                         elif event.key == K_s:
-                            self.ship.vy = 7
+                            self.ship.vy = 1
             else:           
                 self.ship.vy = 0 
                 if event.type == KEYDOWN:     
                     if event.key == K_UP:
-                        self.astronaut.vy = -3
+                        self.astronaut.vy = -1
                     elif event.key == K_DOWN:
-                        self.astronaut.vy = 3
+                        self.astronaut.vy = 1
                     elif event.key == K_LEFT:
-                        self.astronaut.vx = -3
+                        self.astronaut.vx = -1
                     elif event.key == K_RIGHT:
-                        self.astronaut.vx = 3
+                        self.astronaut.vx = 1
                     elif event.key == K_l:
-                        self.angle +=5
+                        self.angle +=1
 
         if not self.score_time == self.win_game_score:
             if self.contador_colision >= 1:
@@ -181,13 +186,13 @@ class Game:
             self.ship.vy = 0
             key_pressed = pg.key.get_pressed()
             if key_pressed[K_UP]:
-                self.astronaut.vy -= 1
+                self.astronaut.vy -= 0.5
             elif key_pressed[K_DOWN]:
-                self.astronaut.vy += 1
+                self.astronaut.vy += 0.5
             elif key_pressed[K_LEFT]:
-                self.astronaut.vx -= 1
+                self.astronaut.vx -= 0.5
             elif key_pressed[K_RIGHT]:
-                self.astronaut.vx += 1
+                self.astronaut.vx += 0.5
             elif key_pressed[K_l]:
                 self.angle +=5
             else:
@@ -241,15 +246,24 @@ class Game:
             self.screen.blit(self.next, (400, 650))
             if self.contador_nivel == 3 and self.difficulty == 'Xtrem':
                 self.playerGroup2.draw(self.screen)
+                self.score_bonus = self.font.render(str(self.bonus_score), True, COLOR_SCORE)
+                self.screen.blit(self.score_bonus, (150, 60))
         if self.contador_colision > 0 and self.contador_vidas >= 1:   
             self.screen.blit(self.text_restart, (500, 500))
-
-        self.fps = self.font.render(str(self.clock.get_fps()), True, COLOR_SCORE)
-        self.screen.blit(self.fps, (100,200)) 
-        
+            
         pg.display.flip()
 
     def config_levels(self):
+        if FPS == 30:
+            self.reset_tiempo = 5
+            self.win_score_level = 500
+        elif FPS == 60:
+            self.reset_tiempo = 10
+           # self.win_score_level = 1000
+        elif FPS == 120:
+            self.reset_tiempo = 20
+            self.win_score_level = 2000
+
         # Configuración de los niveles
         if self.difficulty == 'Easy':
             self.multiplier = 1
@@ -264,12 +278,13 @@ class Game:
             self.contador_nivel = 1
             self.contador_vidas = 3
             self.win_game_score = 0
+            self.bonus_score = 0
 
         if self.contador_nivel == 1:
             self.planet1 = Planet(1)
             self.planetsGroup.add(self.planet1)
-            self.spawn_enemy = 100
-            self.spawn_time = 5
+            self.spawn_enemy = 200
+            self.spawn_time = 0
             self.final_score1 = 0
             self.level1_sound.play(-1)
             self.level1_sound.set_volume(VOLUMEN)
@@ -277,8 +292,8 @@ class Game:
         if self.contador_nivel == 2:
             self.planet2 = Planet(2)
             self.planetsGroup.add(self.planet2)
-            self.spawn_enemy = 200
-            self.spawn_time = 5
+            self.spawn_enemy = 300
+            self.spawn_time = 0
             self.final_score2 = 0
             self.level2_sound.play(-1)
             self.level2_sound.set_volume(VOLUMEN)
@@ -286,8 +301,8 @@ class Game:
         if self.contador_nivel == 3:
             self.planet3 = Planet(3)
             self.planetsGroup.add(self.planet3)
-            self.spawn_enemy = 400
-            self.spawn_time = 5
+            self.spawn_enemy = 700
+            self.spawn_time = 0
             self.final_score3 = 0
             self.level3_sound.play(-1)
             self.level3_sound.set_volume(VOLUMEN)
@@ -296,15 +311,15 @@ class Game:
     def loop_game(self):
         gameover = False
         self.score_time = 1
+        self.bonus_score = 0
         self.x = 0
         self.y = 0
 
         # Música y sonidos
-        pg.mixer.set_num_channels(2)
+        pg.mixer.set_num_channels(3)
        
         # Crear reloj
         self.clock = pg.time.Clock()
-        #second = self.clock.tick(60) / 1000 
               
         # Grupos Sprites
         self.ship = SpaceShip(100, 350)
@@ -317,112 +332,118 @@ class Game:
 
         self.planetsGroup = pg.sprite.Group()
         self.enemySprites = pg.sprite.Group()
-
-        self.config_levels()
+        self.enemyBonus = pg.sprite.Group()
 
         self.allSprites = pg.sprite.Group()
         self.allSprites.add(self.playerGroup)
-        self.allSprites.add(self.planetsGroup)
-      
+
+        # Configuración niveles
+        self.config_levels()
+ 
+        # Puntuación
         self.win_game_score = self.win_score_level * self.contador_nivel * self.multiplier
         self.win_game_score = round(self.win_game_score)
 
-        #self.current_time = 0
         while not gameover:
-            #if self.current_time >= 33:
+            gameover = self.handlenEvent()
+            #self.clock.tick(FPS)
+            self.clock.tick_busy_loop(FPS) # + preciso pero + CPU
+            
+            # Partida (score final no obtenido)
+            if not self.score_time == self.win_game_score:
+                # Spawn enemigos/obstaculos
+                self.spawn_time -= self.restar_tiempo
+                if self.spawn_time <= 0 and self.spawn_enemy > 0:
+                    self.spawn_enemy -= 1
+                    self.spawn_time = self.reset_tiempo 
+                    self.enemySprites.add(Enemy())
+                    self.allSprites.add(self.enemySprites)
                 
-                gameover = self.handlenEvent()
-                #self.clock.tick(FPS)
-                self.clock.tick_busy_loop()
+                colisiones = self.ship.checkCollision(self.enemySprites, FPS)
+                # Condiciones cuando hay colision
+                for colision in colisiones:
+                    self.contador_colision += 1
+                    self.spawn_enemy = 0
+                    self.score_time = 0
                 
-                if not self.score_time == self.win_game_score:
+                if self.contador_colision < self.score_time:
+                    self.score_time += 1 # Sumar puntuación
 
-                    # Spawn enemigos/obstaculos
-                    self.spawn_time -= self.restar_tiempo
-                    if self.spawn_time <= 0 and self.spawn_enemy > 0:
-                        self.spawn_enemy -= 1
-                        self.spawn_time = 5
-                        self.enemySprites.add(Enemy())
-                        self.allSprites.add(self.enemySprites)
-         
-                    colision = pg.sprite.groupcollide(self.enemySprites, self.playerGroup, False, False)
-                    if self.contador_colision < self.score_time:
-                        self.score_time += 1 # Sumar puntuación
-        
-                        # Movimiento fondo
-                        self.x -= 4
-                        if self.x <= - 2560:
-                            self.x = 0
-        
-                    #if colision:
-                        #self.contador_colision += 1
-                        #self.spawn_enemy = 0
-                        #self.score_time = 0
-                        
-                    # Animación explosión
-                    if self.contador_colision >= 1:
-                        self.playerGroup.update(1280, 720, FPS, 2)
-
-                    # Restar vida
-                    if self.contador_colision == 1:
-                        self.contador_vidas -= 1
-                        
-                    # Restar vida + Restart nivel
-                    if self.contador_colision > 0 and self.contador_vidas >= 1: 
-                        key_pressed = pg.key.get_pressed()
-                        if key_pressed[K_r]:
-                            pg.mixer.stop()
-                            self.contador_colision = 0
-                            gameover = True
-                     
-                    self.score = self.font.render(str(self.score_time), True, COLOR_SCORE)
+                    # Movimiento fondo
+                    self.x -= 2
+                    if self.x <= - 2560:
+                        self.x = 0
+  
+                # Restar vida
+                if self.contador_colision == 1:
+                    self.contador_vidas -= 1
                     
-                if self.score_time == self.win_game_score:
-                    self.planetsGroup.update(1280, 720)
-                    self.ship.landing()
-                    
-                    if self.contador_nivel == 3 and self.difficulty == 'Xtrem':
-                        self.playerGroup2.update(1280, 720)
-                        self.astronaut.rotate(self.angle)
-       
+                # Restart nivel
+                if self.contador_colision > 0 and self.contador_vidas >= 1: 
                     key_pressed = pg.key.get_pressed()
-                    if key_pressed[K_SPACE]:
-                        self.contador_nivel +=1
+                    if key_pressed[K_r]:
                         pg.mixer.stop()
+                        self.contador_colision = 0
                         gameover = True
 
-                self.playerGroup.update(1280, 720, FPS, 1)
-                self.enemySprites.update(1280, 720) 
-
-                # Puntuaciones por nivel
-                if self.contador_nivel == 1:
-                    self.final_score1 = self.score_time + 100  
-                if self.contador_nivel == 2:
-                    self.final_score2 = self.score_time + 200  
-                if self.contador_nivel == 3:
-                    if self.contador_vidas == 3:
-                        self.final_score3 = self.score_time + 300 + 3000
-                    if self.contador_vidas == 2:
-                        self.final_score3 = self.score_time + 300 + 2000
-                    if self.contador_vidas == 1:
-                        self.final_score3 = self.score_time + 300 + 1000
-
-                self.all_score = self.final_score1 + self.final_score2 + self.final_score3  
-
+                # Render puntuación
+                self.score = self.font.render(str(self.score_time), True, COLOR_SCORE)
+           
+            # Partida (score final obtenido) 
+            if self.score_time == self.win_game_score:
+                self.allSprites.add(self.planetsGroup)
+                self.ship.landing()
+                
+                # Passar nivel        
                 key_pressed = pg.key.get_pressed()
-                if key_pressed[K_ESCAPE]:
+                if key_pressed[K_SPACE]:
+                    self.contador_nivel +=1
                     pg.mixer.stop()
-                    self.contador_colision = 0
-                    self.contador_nivel = 5
                     gameover = True
-                  
-                self.render()
-                #print(self.clock.get_time())
-                print(self.clock.get_fps())
-                #print(self.clock.get_rawtime())
-            #dt = self.clock.tick(FPS)
-            #self.current_time += dt
-        
+
+                # Juego bonus
+                if self.contador_nivel == 3 and self.difficulty == 'Xtrem':
+                    self.playerGroup2.update(1280, 720)
+                    self.astronaut.rotate(self.angle)
+                    self.spawn_time -= self.restar_tiempo
+                    
+                    if self.spawn_time <= 0 and self.spawn_enemy > 0:
+                        self.spawn_enemy -= 1
+                        self.spawn_time = self.reset_tiempo
+                        self.enemyBonus.add(EnemyBonus())
+                        self.allSprites.add(self.enemyBonus)
+                        aliens = self.astronaut.checkCollision(self.enemyBonus)
+                        for alien in aliens:
+                            self.bonus_score += 10
+
+            # Update ALL sprites
+            self.allSprites.update(1280,720)
+                 
+            # Puntuaciones por nivel
+            if self.contador_nivel == 1: # Cada nivel suma 500
+                self.final_score1 = self.score_time + 500  
+            if self.contador_nivel == 2:
+                self.final_score2 = self.score_time + 1000  
+            if self.contador_nivel == 3:
+                if self.contador_vidas == 3: # Cada vida suma 200
+                    self.final_score3 = self.score_time + 1500 + 600
+                if self.contador_vidas == 2:
+                    self.final_score3 = self.score_time + 1500 + 400
+                if self.contador_vidas == 1:
+                    self.final_score3 = self.score_time + 1500 + 200
+            # Puntuación total
+            self.all_score = self.final_score1 + self.final_score2 + self.final_score3 + self.bonus_score
+            
+            # Salir partida
+            key_pressed = pg.key.get_pressed()
+            if key_pressed[K_ESCAPE]:
+                pg.mixer.stop()
+                self.contador_colision = 0
+                self.contador_nivel = 5
+                gameover = True
+            # Render
+            self.render()
+                    
         if self.contador_nivel == 2:
             self.status = "Level2"
         elif self.contador_nivel == 3:
@@ -438,14 +459,13 @@ class Game:
 
     def game_over(self):
         start = False
-        self.gameover_sound = pg.mixer.Sound('./resources/sounds/pax7.wav')
-        self.gameover_sound.play(0)
-        self.gameover_sound.set_volume(VOLUMEN)
-        pg.time.set_timer(USEREVENT+1, 40000)
 
-        self.text_score_game_over = self.font.render(":( your score is: {}".format(self.all_score), True, COLOR_SCORE)
+        pg.mixer.set_num_channels(1)
+        pg.time.set_timer(USEREVENT+1, 20000)
 
         while not start:
+            self.gameover_sound.play(0)
+            self.gameover_sound.set_volume(VOLUMEN)
             for event in pg.event.get():
                 if event.type == QUIT:
                     self.quit()
@@ -466,9 +486,9 @@ class Game:
                 self.screen.blit(self.bkg2, (0, 0))
             if self.contador_nivel >= 4:
                 self.screen.blit(self.bkg3, (0, 0))
-            self.screen.blit(self.text_score_game_over, (450, 400))
             self.screen.blit(self.text_game_over, (480, 300))
             self.screen.blit(self.escape, (900, 20))
+            self.text_input(":( your score is: {}".format(self.all_score), 450, 400, COLOR_SCORE)
             
             pg.display.flip()
        
@@ -479,15 +499,12 @@ class Game:
         intro = 0
         y = 170
         pg.time.set_timer(USEREVENT+1, 20000)
-
         pg.mixer.set_num_channels(1)
        
-        self.intro_sound = pg.mixer.Sound('./resources/sounds/casa-asteroide.wav')
-
         while not start:    
             self.intro_sound.play(-1)
             self.intro_sound.set_volume(VOLUMEN)
-            #print(self.intro_sound.get_num_channels())
+            
             y -= 0.3
             if y <= 0:
                 y = 0
@@ -536,9 +553,9 @@ class Game:
         if intro == 4:
             self.status = 'Hall of fame'
 
-    def text_input(self, word, x, y):
+    def text_input(self, word, x, y, color):
         font = pg.font.Font("./resources/fonts/font.ttf", 40)
-        text = font.render("{}".format(word), True, COLOR_SCORE)
+        text = font.render("{}".format(word), True, color)
         return self.screen.blit(text,(x,y))
 
     def inpt(self):
@@ -554,12 +571,15 @@ class Game:
                 if event.type == KEYDOWN:
                     if len(self.word) <= 2 and (event.key) and str.upper((chr(event.key))) in Key_accepted:
                             self.word += str.upper((chr(event.key)))
-                            #print(self.word)
-                            #print(len(self.word))
+                            
                     if event.key == K_DELETE:
                         x = len(self.word)
                         self.word = self.word[:-x]
                     if event.key == K_SPACE:
+                        intro = 2
+                        done=True
+                    if event.key == K_ESCAPE:
+                        intro = 1
                         done=True
 
 
@@ -572,12 +592,15 @@ class Game:
 
             self.screen.blits(lista)
 
-            self.text_input("Please enter your name", 450, 170)
-            self.text_input("{}".format(self.word), 590, 300)
+            self.text_input("Please enter your name", 450, 170, COLOR_SCORE)
+            self.text_input("{}".format(self.word), 590, 300, COLOR_SCORE2)
 
             pg.display.flip()
 
-        self.status = "Score"
+        if intro == 1:
+            self.status = "Start"
+        if intro == 2:
+            self.status = "Score"
 
     def score_list(self):
         start = False
@@ -594,26 +617,15 @@ class Game:
         insert_score = cur.execute(query, datos)
 
         query = "SELECT name, total FROM score ORDER BY total DESC LIMIT 3;"
-        rows = cur.execute(query)
+        tops = cur.execute(query)
+
         top_list = []
-        for row in rows:
-            top_list += row
-        print(top_list)
-
-        for top in top_list: 
-            print(top)
-
-        try:
-            self.text_select_score2 = self.font.render("Player: {} | Score: {}".format(top_list[0],top_list[1]), True, COLOR_SCORE2)
-            self.text_select_score3 = self.font.render("Player: {} | Score: {}".format(top_list[2],top_list[3]), True, COLOR_SCORE2)
-            self.text_select_score4 = self.font.render("Player: {} | Score: {}".format(top_list[4],top_list[5]), True, COLOR_SCORE2)
-        except:
-            pass
+        for top in tops:
+            top_list += top
+       
         conn.commit()
         conn.close()
 
-        self.text_score_player = self.font.render("Congratulations {}, your score is: {}".format(self.word, self.all_score), True, COLOR_SCORE)
-        
         while not start:
             for event in pg.event.get():
                 if event.type == QUIT:
@@ -627,23 +639,20 @@ class Game:
                     pg.mixer.stop()
                     start = True
                        
-            self.screen.blit(self.bkg3, (0, 0))
-            self.screen.blit(self.escape, (900, 20))
-            self.screen.blit(self.cup1, (350, 250))
-            self.screen.blit(self.cup2, (350, 350))
-            self.screen.blit(self.cup3, (350, 450))
-            self.screen.blit(self.text_score_player, (300, 150))
+            lista = [(self.bkg3, (0, 0)),
+                    (self.escape, (900, 20)),
+                    (self.cup1, (350, 250)),
+                    (self.cup2, (350, 350)),
+                    (self.cup3, (350, 450)),
+                    ]
+            self.screen.blits(lista)
 
-            '''
-            lista_textos = [(self.text_select_score2, (450, 300)),
-                            (self.text_select_score3, (450, 400)),
-                            (self.text_select_score4, (450, 500))
-                            ]
-            '''
+            self.text_input("Congratulations {}, your score is: {}".format(self.word, self.all_score), 300, 150, COLOR_SCORE)
+
             try:
-                self.screen.blit(self.text_select_score2, (450, 300))
-                self.screen.blit(self.text_select_score3, (450, 400))
-                self.screen.blit(self.text_select_score4, (450, 500))
+                self.text_input("Player: {} | Score: {}".format(top_list[0],top_list[1]), 450, 300, COLOR_SCORE2)
+                self.text_input("Player: {} | Score: {}".format(top_list[2],top_list[3]), 450, 400, COLOR_SCORE2)
+                self.text_input("Player: {} | Score: {}".format(top_list[4],top_list[5]), 450, 500, COLOR_SCORE2)
             except:
                 pass
 
@@ -654,7 +663,7 @@ class Game:
     def game_info(self):
         start = False
 
-        pg.time.set_timer(USEREVENT+1, 40000)
+        pg.time.set_timer(USEREVENT+1, 60000)
 
         while not start:
             for event in pg.event.get():
@@ -698,7 +707,7 @@ class Game:
         intro = 0
         y = 100
         
-        pg.time.set_timer(USEREVENT+1, 20000)
+        pg.time.set_timer(USEREVENT+1, 30000)
 
         while not start:
             y -= 0.2
@@ -738,19 +747,12 @@ class Game:
         cur = conn.cursor()
 
         query = "SELECT name, total FROM score ORDER BY total DESC LIMIT 3;"
-        
-        top = cur.execute(query)
+        tops = cur.execute(query)
+
         top_list = []
-        for y in top:
-            top_list += y
-
-        try:
-            self.text_select_score2 = self.font.render("Player: {} | Score: {}".format(top_list[0],top_list[1]), True, COLOR_SCORE2)
-            self.text_select_score3 = self.font.render("Player: {} | Score: {}".format(top_list[2],top_list[3]), True, COLOR_SCORE2)
-            self.text_select_score4 = self.font.render("Player: {} | Score: {}".format(top_list[4],top_list[5]), True, COLOR_SCORE2)
-        except:
-            pass
-
+        for top in tops:
+            top_list += top
+     
         while not start:
             for event in pg.event.get():
                 if event.type == QUIT:
@@ -763,7 +765,6 @@ class Game:
                         start = True
                     if event.key == K_DELETE:
                         cur.execute("DELETE FROM score;")
-                        print(top_list)
                         start = True
                  
             lista = [(self.bkg3, (0, 0)),
@@ -772,17 +773,18 @@ class Game:
                     (self.cup2, (350, 350)),
                     (self.cup3, (350, 450)),
                     (self.text_hall_of_fame, (500, 150)),
+                    (self.text_delete, (1100, 680))
                     ]
 
             self.screen.blits(lista)
-
+                        
             try:
-                self.screen.blit(self.text_select_score2, (450, 300))
-                self.screen.blit(self.text_select_score3, (450, 400))
-                self.screen.blit(self.text_select_score4, (450, 500))
+                self.text_input("Player: {} | Score: {}".format(top_list[0],top_list[1]), 450, 300, COLOR_SCORE2)
+                self.text_input("Player: {} | Score: {}".format(top_list[2],top_list[3]), 450, 400, COLOR_SCORE2)
+                self.text_input("Player: {} | Score: {}".format(top_list[4],top_list[5]), 450, 500, COLOR_SCORE2)
             except:
                 pass
-
+            
             pg.display.flip()
 
         conn.commit()
@@ -792,11 +794,19 @@ class Game:
 
     def game_difficulty(self):
         start = False
+        pg.time.set_timer(USEREVENT+1, 90000)
+        pg.mixer.set_num_channels(1)
 
         while not start:
             for event in pg.event.get():
+                self.difficulty_sound.play(-1)
+                self.difficulty_sound.set_volume(VOLUMEN)
                 if event.type==pg.QUIT:
                     self.quit()
+
+                if event.type == USEREVENT+1:
+                        intro = 1
+                        start = True
 
                 if event.type == KEYDOWN:
                     if event.key == K_e:
@@ -818,7 +828,7 @@ class Game:
                     if event.key == K_ESCAPE:
                         intro = 1
                         start = True
-
+                    
             lista = [(self.image_difficulty, (0, 0)),
                     (self.escape, (900, 20)),
                     (self.text_difficulty, (450, 100)),
@@ -833,8 +843,10 @@ class Game:
             pg.display.flip()
 
         if intro == 1:
+            pg.mixer.stop()
             self.status = "Start"
         if intro == 2:
+            pg.mixer.stop()
             self.status = "Game"
 
     def main_loop(self):
