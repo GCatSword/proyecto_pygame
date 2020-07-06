@@ -69,7 +69,8 @@ class Game:
         self.level2_sound = pg.mixer.Sound('./resources/sounds/pax5.wav')
         self.level3_sound = pg.mixer.Sound('./resources/sounds/pax8.wav')
         self.gameover_sound = pg.mixer.Sound('./resources/sounds/pax7.wav')
-
+        self.score_sound = pg.mixer.Sound('./resources/sounds/pax10.wav')
+        
         # Status inicial
         self.status = 'Start'
 
@@ -603,7 +604,6 @@ class Game:
 
     def score_list(self):
         start = False
-        self.score_sound = pg.mixer.Sound('./resources/sounds/pax10.wav')
         self.score_sound.play(0)
         self.score_sound.set_volume(VOLUMEN)
         pg.time.set_timer(USEREVENT+1, 20000)
